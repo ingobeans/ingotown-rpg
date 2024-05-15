@@ -1,0 +1,45 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "tileset.tsx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "ingotown.tmx": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 146.25,
+                "y": -35.75
+            }
+        },
+        "tileset.tsx": {
+            "scaleInDock": 8,
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "A:/Projects/ingotown-rpg",
+    "last.imagePath": "A:/Projects/ingotown-rpg",
+    "map.fixedSize": false,
+    "map.lastUsedExportFilter": "CSV files (*.csv)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 8,
+    "map.tileWidth": 8,
+    "openFiles": [
+        "tileset.tsx",
+        "ingotown.tmx"
+    ],
+    "project": "ingotown.tiled-project",
+    "recentFiles": [
+        "ingotown.tmx",
+        "tileset.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 8,
+        "width": 8
+    }
+}
