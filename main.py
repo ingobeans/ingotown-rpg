@@ -69,12 +69,20 @@ class Player:
 
         for tile_x in tiles_x:
             for tile_y in tiles_y:
-                tile = tilemap_collision.get_tile(tile_x, tile_y)
                 if debug:
                     sx, sy = world_to_screen(tile_x*8, tile_y*8)
-                    boopy.draw_rect(sx, sy, sx+8, sy+8, (133,0,133))
+                    boopy.draw_rect(sx, sy, sx+8, sy+8, (44,77,244))
+
+                tile = tilemap_collision.get_tile(tile_x, tile_y)
                 if tile != -1:
                     return True
+                
+                # check if there is a single way platform to collide with
+                # but first check that the player is above it and traveling downwards
+                if self.velocity_y > 0 and round(y/8) < tile_y:
+                    tile = tilemap_singleway.get_tile(tile_x, tile_y)
+                    if tile != -1:
+                        return True
         
         return False
         
@@ -147,9 +155,9 @@ def update():
     
     px, py = world_to_screen(player.x, player.y)
     boopy.draw_spritesheet(px, py, character_spritesheet, player.sprite)
+    boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
     
     player.physics()
     player.move()
-    boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
 
 boopy.run(update, screen_width=screen_width, screen_height=screen_height, fullscreen=True, fps_cap=None, vsync=True)
