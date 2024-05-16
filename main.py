@@ -54,8 +54,8 @@ class Player:
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
 
-tilemap_collision = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists("map/ingotown/ingotown_Collision.csv"),(0,0,0))
-tilemap_decoration = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists("map/ingotown/ingotown_Decoration.csv"),(0,0,0))
+tilemap_collision = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists("map/ingotown/ingotown_Collision.csv"),(255,0,0))
+tilemap_decoration = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists("map/ingotown/ingotown_Decoration.csv"),(255,0,0))
 
 player = Player()
 
