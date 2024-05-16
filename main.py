@@ -3,7 +3,7 @@ import boopy, screeninfo, math
 def calc_screen_size():
     screen = screeninfo.get_monitors()[0]
     width, height = screen.width, screen.height
-    target_height = 12*8
+    target_height = 18*8
 
     return int(width / (height / target_height)), target_height
 
