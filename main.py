@@ -11,6 +11,11 @@ screen_width, screen_height = calc_screen_size()
 gravity = 0.3
 min_tile_height = 10
 
+left_key = [boopy.K_a, boopy.K_LEFT]
+right_key = [boopy.K_d, boopy.K_RIGHT]
+up_key = [boopy.K_w, boopy.K_SPACE, boopy.K_UP]
+down_key = [boopy.K_s, boopy.K_DOWN]
+
 class Player:
     def __init__(self) -> None:
         self.x = 15 * 8
@@ -55,11 +60,11 @@ class Player:
     def move(self):
         new_x = self.x
         new_y = self.y
-        if boopy.btn(boopy.K_d):
+        if boopy.btn(right_key):
             new_x += self.speed
-        if boopy.btn(boopy.K_a):
+        if boopy.btn(left_key):
             new_x -= self.speed
-        if boopy.btn(boopy.K_SPACE) and self.grounded:
+        if boopy.btn(up_key) and self.grounded:
             self.velocity_y = -self.jump_force
 
         new_y += self.velocity_y
