@@ -8,37 +8,43 @@ def calc_screen_size():
     return int(width / (height / target_height)), target_height
 
 screen_width, screen_height = calc_screen_size()
+
 gravity = 0.13
-min_tile_height = 10
 
 left_key = [boopy.K_a, boopy.K_LEFT]
 right_key = [boopy.K_d, boopy.K_RIGHT]
 up_key = [boopy.K_w, boopy.K_SPACE, boopy.K_UP]
 down_key = [boopy.K_s, boopy.K_DOWN]
+sprint_key = [boopy.K_LSHIFT]
 
 class Location:
-    def __init__(self, name:str, camera_follow, camera_offset_x, camera_offset_y) -> None:
+    def __init__(self, name:str, camera_follow, camera_offset_x, camera_offset_y, start_tile_x, start_tile_y) -> None:
         self.name = name
         self.camera_follow = camera_follow
         self.camera_offset_x = camera_offset_x
         self.camera_offset_y = camera_offset_y
+        self.start_tile_x = start_tile_x
+        self.start_tile_y = start_tile_y
 
     def load(self):
         tilemap_collision = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Collision.csv"),(255,0,0))
         tilemap_decoration = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Decoration.csv"),(255,0,0))
         tilemap_singleway = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Single Way Collision.csv"),(255,0,0))
+        player.x = self.start_tile_x * 8
+        player.y = self.start_tile_y * 8
 
         return tilemap_collision, tilemap_decoration, tilemap_singleway
 
 class Locations:
-    ingotown = Location("ingotown",True,0,-130)
-    testtown = Location("ingotown",False,-130,-130)
+    ingotown = Location("ingotown",True,0,-130,15,19)
+    testtown = Location("ingotown",False,-130,-130,15,19)
 
 class Player:
     def __init__(self) -> None:
-        self.x = 15 * 8
-        self.y = 19 * 8
+        self.x = 0
+        self.y = 0
         self.speed = 1
+        self.sprint_speed_multiplier = 3
         self.velocity_y = 0
         self.jump_force = 2
         self.sprite = 0
@@ -79,10 +85,11 @@ class Player:
     def move(self):
         new_x = self.x
         new_y = self.y
+        sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
         if boopy.btn(right_key):
-            new_x += self.speed
+            new_x += self.speed * sprint
         if boopy.btn(left_key):
-            new_x -= self.speed
+            new_x -= self.speed * sprint
         if boopy.btn(up_key) and self.grounded:
             self.velocity_y = -self.jump_force
 
@@ -114,17 +121,22 @@ environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
 location = Locations.ingotown
 
+player = Player()
+
 tilemap_collision, tilemap_decoration, tilemap_singleway = location.load()
 
-player = Player()
+def clamp(value, min_val, max_val):
+    return max(min(value, max_val), min_val)
 
 def world_to_screen(x, y):
     if location.camera_follow:
-        return screen_width//2 - int(player.x) + x + location.camera_offset_x, screen_height//2 + y + location.camera_offset_y
+        sx = screen_width//2 - int(player.x) + x + location.camera_offset_x
+        sy = screen_height//2 + y + location.camera_offset_y
+
+        return sx, sy
     return screen_width//2 + x + location.camera_offset_x, screen_height//2 + y + location.camera_offset_y
 
 def update():
-    
     boopy.cls((104,204,255))
 
     tilemap_x, tilemap_y = world_to_screen(0,0)
@@ -132,10 +144,9 @@ def update():
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_collision)
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_singleway)
 
-    if location.camera_follow:
-        boopy.draw_spritesheet(screen_width//2 + location.camera_offset_x, screen_height//2+ player.y + location.camera_offset_y, character_spritesheet, player.sprite)
-    else:
-        boopy.draw_spritesheet(screen_width//2 +player.x + location.camera_offset_x, screen_height//2 + player.y + location.camera_offset_y, character_spritesheet, player.sprite)
+    
+    px, py = world_to_screen(player.x, player.y)
+    boopy.draw_spritesheet(px, py, character_spritesheet, player.sprite)
     
     player.physics()
     player.move()
