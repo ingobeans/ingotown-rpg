@@ -8,7 +8,7 @@ def calc_screen_size():
     return int(width / (height / target_height)), target_height
 
 screen_width, screen_height = calc_screen_size()
-gravity = 0.3
+gravity = 0.13
 min_tile_height = 10
 
 left_key = [boopy.K_a, boopy.K_LEFT]
@@ -16,16 +16,34 @@ right_key = [boopy.K_d, boopy.K_RIGHT]
 up_key = [boopy.K_w, boopy.K_SPACE, boopy.K_UP]
 down_key = [boopy.K_s, boopy.K_DOWN]
 
+class Location:
+    def __init__(self, name:str, camera_follow, camera_offset_x, camera_offset_y) -> None:
+        self.name = name
+        self.camera_follow = camera_follow
+        self.camera_offset_x = camera_offset_x
+        self.camera_offset_y = camera_offset_y
+
+    def load(self):
+        tilemap_collision = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Collision.csv"),(255,0,0))
+        tilemap_decoration = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Decoration.csv"),(255,0,0))
+        tilemap_singleway = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Single Way Collision.csv"),(255,0,0))
+
+        return tilemap_collision, tilemap_decoration, tilemap_singleway
+
+class Locations:
+    ingotown = Location("ingotown",True,0,-130)
+    testtown = Location("ingotown",False,-130,-130)
+
 class Player:
     def __init__(self) -> None:
         self.x = 15 * 8
         self.y = 19 * 8
         self.speed = 1
         self.velocity_y = 0
-        self.jump_force = 3
+        self.jump_force = 2
         self.sprite = 0
     
-    def collides_with_tile(self, x, y, debug = True):
+    def collides_with_tile(self, x, y, debug = False):
         tile_x_min = int(x / 8)
         tile_x_max = math.ceil(x / 8)
         tiles_x = [tile_x_min, tile_x_max]
@@ -48,6 +66,7 @@ class Player:
                 tile = tilemap_collision.get_tile(tile_x, tile_y)
                 if debug:
                     sx, sy = world_to_screen(tile_x*8, tile_y*8)
+                    boopy.draw_rect(sx, sy, sx+8, sy+8, (133,0,133))
                 if tile != -1:
                     return True
         
@@ -93,23 +112,33 @@ class Player:
 
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
+location = Locations.ingotown
 
-tilemap_collision = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists("map/ingotown/ingotown_Collision.csv"),(255,0,0))
-tilemap_decoration = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists("map/ingotown/ingotown_Decoration.csv"),(255,0,0))
+tilemap_collision, tilemap_decoration, tilemap_singleway = location.load()
 
 player = Player()
 
 def world_to_screen(x, y):
-    return screen_width//2 - int(player.x) + x, screen_height//2 - int(player.y) + y
+    if location.camera_follow:
+        return screen_width//2 - int(player.x) + x + location.camera_offset_x, screen_height//2 + y + location.camera_offset_y
+    return screen_width//2 + x + location.camera_offset_x, screen_height//2 + y + location.camera_offset_y
 
 def update():
+    
     boopy.cls((104,204,255))
 
     tilemap_x, tilemap_y = world_to_screen(0,0)
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_decoration)
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_collision)
-    boopy.draw_spritesheet(screen_width//2, screen_height//2, character_spritesheet, player.sprite)
+    boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_singleway)
+
+    if location.camera_follow:
+        boopy.draw_spritesheet(screen_width//2 + location.camera_offset_x, screen_height//2+ player.y + location.camera_offset_y, character_spritesheet, player.sprite)
+    else:
+        boopy.draw_spritesheet(screen_width//2 +player.x + location.camera_offset_x, screen_height//2 + player.y + location.camera_offset_y, character_spritesheet, player.sprite)
+    
     player.physics()
     player.move()
+    boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
 
-boopy.run(update, screen_width=screen_width, screen_height=screen_height)
+boopy.run(update, screen_width=screen_width, screen_height=screen_height, fullscreen=True, fps_cap=None, vsync=True)

@@ -32,7 +32,7 @@
         "tileset.tsx",
         "ingotown.tmx"
     ],
-    "project": "ingotown.tiled-project",
+    "project": "world.tiled-project",
     "recentFiles": [
         "ingotown.tmx",
         "tileset.tsx"
