@@ -54,12 +54,6 @@ class Character:
         self.jump_force = 2
         self.sprite = sprite
 
-class Player(Character):
-    def __init__(self) -> None:
-        super().__init__(0,0,0)
-        self.speed = 1
-        self.sprint_speed_multiplier = 3
-    
     def collides_with_tile(self, x, y, debug = False):
         tile_x_min = int(x / 8)
         tile_x_max = math.ceil(x / 8)
@@ -98,21 +92,19 @@ class Player(Character):
         return False
         
 
-    def physics(self):
-        self.velocity_y += gravity
+class Player(Character):
+    def __init__(self) -> None:
+        super().__init__(0,0,0)
+        self.speed = 1
+        self.sprint_speed_multiplier = 3
 
-    def move(self):
+    def physics(self):
         new_x = self.x
         new_y = self.y
-        sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
-        if boopy.btn(right_key):
-            new_x += self.speed * sprint
-        if boopy.btn(left_key):
-            new_x -= self.speed * sprint
-        if boopy.btn(up_key) and self.grounded:
-            self.velocity_y = -self.jump_force
 
         new_y += self.velocity_y
+        new_x += self.velocity_x
+        self.velocity_x = 0
         
         # stop player from moving inside tiles on X axis
         colliding_tile = self.collides_with_tile(new_x, self.y)
@@ -142,6 +134,16 @@ class Player(Character):
 
         self.y = new_y
         self.x = new_x
+        self.velocity_y += gravity
+
+    def move(self):
+        sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
+        if boopy.btn(right_key):
+            self.velocity_x = self.speed * sprint
+        if boopy.btn(left_key):
+            self.velocity_x = -self.speed * sprint
+        if boopy.btn(up_key) and self.grounded:
+            self.velocity_y = -self.jump_force
 
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
@@ -175,7 +177,7 @@ def update():
     boopy.draw_spritesheet(px, py, character_spritesheet, player.sprite)
     boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
     
-    player.physics()
     player.move()
+    player.physics()
 
 boopy.run(update, screen_width=screen_width, screen_height=screen_height, fullscreen=False, fps_cap=None, vsync=True)
