@@ -89,15 +89,11 @@ class Character:
             elif new_y > self.y: # moving down
                 new_y = (int(new_y/8))*8
                 self.grounded = True
+                self.ground_type = colliding_tile
             self.velocity_y = 0
-
-            # allow player to go downwards through singleway platform
-            if colliding_tile == Tiletype.singleway:
-                if boopy.btnp(down_key):
-                    new_y += 5
-                    self.grounded = False
         else:
             self.grounded = False
+            self.ground_type = -1
 
         self.y = new_y
         self.x = new_x
@@ -174,6 +170,11 @@ class Player(Character):
             self.velocity_x -= self.speed * sprint
         if boopy.btn(up_key) and self.grounded:
             self.velocity_y = -self.jump_force
+
+        if boopy.btnp(down_key) and self.ground_type == 2:
+            self.y += 5
+            self.grounded = False
+            self.ground_type = -1
 
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
