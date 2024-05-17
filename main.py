@@ -42,7 +42,7 @@ class Tiletype:
     singleway=2
 
 class Locations:
-    ingotown = Location("ingotown",True,0,-130,15,19)
+    ingotown = Location("ingotown",True,20,-130,25,19)
     testtown = Location("ingotown",False,-130,-130,15,19)
 
 class Character:
@@ -146,6 +146,8 @@ class Player(Character):
         self.speed = 0.3
         self.jump_force = 2.13
         self.sprint_speed_multiplier = 3
+        self.camera_x = location.camera_offset_x
+        self.camera_y = location.camera_offset_y
 
     def move(self):
         sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
@@ -169,11 +171,18 @@ def clamp(value, min_val, max_val):
 
 def world_to_screen(x, y):
     if location.camera_follow:
-        sx = screen_width//2 - int(player.x) + x + location.camera_offset_x
-        sy = screen_height//2 + y + location.camera_offset_y
+        if player.x < screen_width // 2 + location.camera_offset_x:
+            player.camera_x = player.x - (screen_width // 2)
+
+        if player.x > tilemap_collision.map_width * 8 - screen_width // 2 + location.camera_offset_x:
+            player.camera_x = player.x - (tilemap_collision.map_width * 8 - screen_width // 2)
+
+
+        sx = screen_width // 2 - int(player.x) + x + player.camera_x
+        sy = screen_height // 2 + y + player.camera_y
 
         return sx, sy
-    return screen_width//2 + x + location.camera_offset_x, screen_height//2 + y + location.camera_offset_y
+    return screen_width // 2 + x + player.camera_x, screen_height // 2 + y + player.camera_y
 
 def update():
     boopy.cls((104,204,255))
