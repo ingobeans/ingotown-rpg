@@ -42,7 +42,7 @@ class Tiletype:
     singleway=2
 
 class Locations:
-    ingotown = Location("ingotown",True,20,-130,25,19)
+    ingotown = Location("ingotown",True,0,-130,25,19)
     testtown = Location("ingotown",False,-130,-130,15,19)
 
 class Character:
