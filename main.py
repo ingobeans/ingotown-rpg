@@ -173,9 +173,10 @@ def world_to_screen(x, y):
     if location.camera_follow:
         if player.x < screen_width // 2 + location.camera_offset_x:
             player.camera_x = player.x - (screen_width // 2)
-
-        if player.x > tilemap_collision.map_width * 8 - screen_width // 2 + location.camera_offset_x:
+        elif player.x > tilemap_collision.map_width * 8 - screen_width // 2 + location.camera_offset_x:
             player.camera_x = player.x - (tilemap_collision.map_width * 8 - screen_width // 2)
+        else: 
+            player.camera_x = location.camera_offset_x
 
 
         sx = screen_width // 2 - int(player.x) + x + player.camera_x
