@@ -55,6 +55,7 @@ class Character:
         self.sprite = 0
         self.width = 1
         self.height = 1
+        self.facing_left = False
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.x}, {self.y})"
@@ -62,6 +63,11 @@ class Character:
     def physics(self):
         new_x = self.x
         new_y = self.y
+
+        if self.velocity_x < 0:
+            self.facing_left = True
+        elif self.velocity_x > 0:
+            self.facing_left = False
 
         self.velocity_x = clamp(self.velocity_x, -7, 7)
         if -0.1 < self.velocity_x < 0.1:
@@ -100,6 +106,9 @@ class Character:
 
         self.velocity_y += gravity
         self.velocity_x /= deceleration_x
+
+    def get_interactable_npc(self):
+        pass
 
     def collides_with_tile(self, x, y, debug = False):
         tile_x_min = int(x / 8)
@@ -176,6 +185,10 @@ class Player(Character):
             self.grounded = False
             self.ground_type = -1
 
+        interactable_npc = self.get_interactable_npc()
+        if boopy.btnp(interact_key):
+            pass
+
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
 location = Locations.ingotown
@@ -220,6 +233,7 @@ def update():
                 tx, ty = character_spritesheet.get_sprite_coordinate_by_index(character.sprite)
                 boopy.draw_spritesheet_from_coordinate(px, py, character_spritesheet, tx + x, ty + y)
     boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
+    boopy.draw_text(0,10,f"FPS: {player.facing_left}")
     
     player.move()
     player.physics()
