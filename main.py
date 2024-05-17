@@ -46,14 +46,60 @@ class Locations:
     testtown = Location("ingotown",False,-130,-130,15,19)
 
 class Character:
-    def __init__(self, x, y, sprite) -> None:
-        self.x = x
-        self.y = y
+    def __init__(self) -> None:
+        self.x = 0
+        self.y = 0
         self.speed = 1
         self.velocity_x = 0
         self.velocity_y = 0
         self.jump_force = 2
-        self.sprite = sprite
+        self.sprite = 0
+
+    def physics(self):
+        new_x = self.x
+        new_y = self.y
+
+        self.velocity_x = clamp(self.velocity_x, -7, 7)
+        if -0.1 < self.velocity_x < 0.1:
+            self.velocity_x = 0
+
+        velocity_y = self.velocity_y
+        velocity_x = round(self.velocity_x)
+
+        new_y += velocity_y
+        new_x += velocity_x
+        
+        # stop character from moving inside tiles on X axis
+        colliding_tile = self.collides_with_tile(new_x, self.y)
+        if colliding_tile:
+            if new_x < self.x: # moving left
+                new_x = (math.ceil(new_x/8))*8
+            elif new_x > self.x: # moving right
+                new_x = (int(new_x/8))*8
+
+        # stop character from moving inside tiles on Y axis
+        colliding_tile = self.collides_with_tile(new_x, new_y)
+        if colliding_tile:
+            if new_y < self.y: # moving up
+                new_y = (math.ceil(new_y/8))*8
+            elif new_y > self.y: # moving down
+                new_y = (int(new_y/8))*8
+                self.grounded = True
+            self.velocity_y = 0
+
+            # allow player to go downwards through singleway platform
+            if colliding_tile == Tiletype.singleway:
+                if boopy.btnp(down_key):
+                    new_y += 5
+                    self.grounded = False
+        else:
+            self.grounded = False
+
+        self.y = new_y
+        self.x = new_x
+
+        self.velocity_y += gravity
+        self.velocity_x /= deceleration_x
 
     def collides_with_tile(self, x, y, debug = False):
         tile_x_min = int(x / 8)
@@ -95,55 +141,11 @@ class Character:
 
 class Player(Character):
     def __init__(self) -> None:
-        super().__init__(0,0,0)
+        super().__init__()
+        self.sprite = 0
         self.speed = 0.3
+        self.jump_force = 2.13
         self.sprint_speed_multiplier = 3
-
-    def physics(self):
-        new_x = self.x
-        new_y = self.y
-
-        self.velocity_x = clamp(self.velocity_x, -7, 7)
-        if -0.1 < self.velocity_x < 0.1:
-            self.velocity_x = 0
-
-        velocity_y = self.velocity_y
-        velocity_x = round(self.velocity_x)
-
-        new_y += velocity_y
-        new_x += velocity_x
-        
-        # stop player from moving inside tiles on X axis
-        colliding_tile = self.collides_with_tile(new_x, self.y)
-        if colliding_tile:
-            if new_x < self.x: # moving left
-                new_x = (math.ceil(new_x/8))*8
-            elif new_x > self.x: # moving right
-                new_x = (int(new_x/8))*8
-
-        # stop player from moving inside tiles on Y axis
-        colliding_tile = self.collides_with_tile(new_x, new_y)
-        if colliding_tile:
-            if new_y < self.y: # moving up
-                new_y = (math.ceil(new_y/8))*8
-            elif new_y > self.y: # moving down
-                new_y = (int(new_y/8))*8
-                self.grounded = True
-            self.velocity_y = 0
-
-            # allow player to go downwards through singleway platform
-            if colliding_tile == Tiletype.singleway:
-                if boopy.btnp(down_key):
-                    new_y += 5
-                    self.grounded = False
-        else:
-            self.grounded = False
-
-        self.y = new_y
-        self.x = new_x
-
-        self.velocity_y += gravity
-        self.velocity_x /= deceleration_x
 
     def move(self):
         sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
