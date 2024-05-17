@@ -116,9 +116,8 @@ class Player:
                 new_y = (math.ceil(new_y/8))*8
             elif new_y > self.y: # moving down
                 new_y = (int(new_y/8))*8
-            if self.velocity_y > 0:
-                self.velocity_y = 0
-            self.grounded = True
+                self.grounded = True
+            self.velocity_y = 0
         else:
             self.grounded = False
 
