@@ -35,6 +35,11 @@ class Location:
 
         return tilemap_collision, tilemap_decoration, tilemap_singleway
 
+class Tiletype:
+    decoration=0
+    collision=1
+    singleway=2
+
 class Locations:
     ingotown = Location("ingotown",True,0,-130,15,19)
     testtown = Location("ingotown",False,-130,-130,15,19)
@@ -75,14 +80,14 @@ class Player:
 
                 tile = tilemap_collision.get_tile(tile_x, tile_y)
                 if tile != -1:
-                    return True
+                    return Tiletype.collision
                 
                 # check if there is a single way platform to collide with
                 # but first check that the player is above it and traveling downwards
                 if self.velocity_y > 0 and round(y/8) < tile_y:
                     tile = tilemap_singleway.get_tile(tile_x, tile_y)
                     if tile != -1:
-                        return True
+                        return Tiletype.singleway
         
         return False
         
@@ -104,20 +109,28 @@ class Player:
         new_y += self.velocity_y
         
         # stop player from moving inside tiles on X axis
-        if self.collides_with_tile(new_x, self.y):
+        colliding_tile = self.collides_with_tile(new_x, self.y)
+        if colliding_tile:
             if new_x < self.x: # moving left
                 new_x = (math.ceil(new_x/8))*8
             elif new_x > self.x: # moving right
                 new_x = (int(new_x/8))*8
 
         # stop player from moving inside tiles on Y axis
-        if self.collides_with_tile(new_x, new_y):
+        colliding_tile = self.collides_with_tile(new_x, new_y)
+        if colliding_tile:
             if new_y < self.y: # moving up
                 new_y = (math.ceil(new_y/8))*8
             elif new_y > self.y: # moving down
                 new_y = (int(new_y/8))*8
                 self.grounded = True
             self.velocity_y = 0
+
+            # allow player to go downwards through singleway platform
+            if colliding_tile == Tiletype.singleway:
+                if boopy.btnp(down_key):
+                    new_y += 5
+                    self.grounded = False
         else:
             self.grounded = False
 
@@ -159,4 +172,4 @@ def update():
     player.physics()
     player.move()
 
-boopy.run(update, screen_width=screen_width, screen_height=screen_height, fullscreen=True, fps_cap=None, vsync=True)
+boopy.run(update, screen_width=screen_width, screen_height=screen_height, fullscreen=False, fps_cap=None, vsync=True)
