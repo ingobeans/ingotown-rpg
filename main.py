@@ -146,8 +146,6 @@ class Player(Character):
         self.speed = 0.3
         self.jump_force = 2.13
         self.sprint_speed_multiplier = 3
-        self.camera_x = location.camera_offset_x
-        self.camera_y = location.camera_offset_y
 
     def move(self):
         sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
@@ -171,19 +169,20 @@ def clamp(value, min_val, max_val):
 
 def world_to_screen(x, y):
     if location.camera_follow:
+        offset_x = location.camera_offset_x
         if player.x < screen_width // 2 + location.camera_offset_x:
-            player.camera_x = player.x - (screen_width // 2)
+            offset_x = player.x - (screen_width // 2)
         elif player.x > tilemap_collision.map_width * 8 - screen_width // 2 + location.camera_offset_x:
-            player.camera_x = player.x - (tilemap_collision.map_width * 8 - screen_width // 2)
+            offset_x = player.x - (tilemap_collision.map_width * 8 - screen_width // 2)
         else: 
-            player.camera_x = location.camera_offset_x
+            offset_x = location.camera_offset_x
 
 
-        sx = screen_width // 2 - int(player.x) + x + player.camera_x
-        sy = screen_height // 2 + y + player.camera_y
+        sx = screen_width // 2 - int(player.x) + x + offset_x
+        sy = screen_height // 2 + y + location.camera_offset_y
 
         return sx, sy
-    return screen_width // 2 + x + player.camera_x, screen_height // 2 + y + player.camera_y
+    return screen_width // 2 + x + player.camera_x, screen_height // 2 + y + location.camera_offset_y
 
 def update():
     boopy.cls((104,204,255))
