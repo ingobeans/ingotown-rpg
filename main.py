@@ -44,15 +44,21 @@ class Locations:
     ingotown = Location("ingotown",True,0,-130,15,19)
     testtown = Location("ingotown",False,-130,-130,15,19)
 
-class Player:
-    def __init__(self) -> None:
-        self.x = 0
-        self.y = 0
+class Character:
+    def __init__(self, x, y, sprite) -> None:
+        self.x = x
+        self.y = y
         self.speed = 1
-        self.sprint_speed_multiplier = 3
+        self.velocity_x = 0
         self.velocity_y = 0
         self.jump_force = 2
-        self.sprite = 0
+        self.sprite = sprite
+
+class Player(Character):
+    def __init__(self) -> None:
+        super().__init__(0,0,0)
+        self.speed = 1
+        self.sprint_speed_multiplier = 3
     
     def collides_with_tile(self, x, y, debug = False):
         tile_x_min = int(x / 8)
