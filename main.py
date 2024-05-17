@@ -10,6 +10,7 @@ def calc_screen_size():
 screen_width, screen_height = calc_screen_size()
 
 gravity = 0.13
+deceleration_x = 1.4
 
 left_key = [boopy.K_a, boopy.K_LEFT]
 right_key = [boopy.K_d, boopy.K_RIGHT]
@@ -95,16 +96,22 @@ class Character:
 class Player(Character):
     def __init__(self) -> None:
         super().__init__(0,0,0)
-        self.speed = 1
+        self.speed = 0.3
         self.sprint_speed_multiplier = 3
 
     def physics(self):
         new_x = self.x
         new_y = self.y
 
-        new_y += self.velocity_y
-        new_x += self.velocity_x
-        self.velocity_x = 0
+        self.velocity_x = clamp(self.velocity_x, -7, 7)
+        if -0.1 < self.velocity_x < 0.1:
+            self.velocity_x = 0
+
+        velocity_y = self.velocity_y
+        velocity_x = round(self.velocity_x)
+
+        new_y += velocity_y
+        new_x += velocity_x
         
         # stop player from moving inside tiles on X axis
         colliding_tile = self.collides_with_tile(new_x, self.y)
@@ -134,14 +141,16 @@ class Player(Character):
 
         self.y = new_y
         self.x = new_x
+
         self.velocity_y += gravity
+        self.velocity_x /= deceleration_x
 
     def move(self):
         sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
         if boopy.btn(right_key):
-            self.velocity_x = self.speed * sprint
+            self.velocity_x += self.speed * sprint
         if boopy.btn(left_key):
-            self.velocity_x = -self.speed * sprint
+            self.velocity_x -= self.speed * sprint
         if boopy.btn(up_key) and self.grounded:
             self.velocity_y = -self.jump_force
 
