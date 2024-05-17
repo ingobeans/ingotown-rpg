@@ -19,13 +19,14 @@ down_key = [boopy.K_s, boopy.K_DOWN]
 sprint_key = [boopy.K_LSHIFT]
 
 class Location:
-    def __init__(self, name:str, camera_follow, camera_offset_x, camera_offset_y, start_tile_x, start_tile_y) -> None:
+    def __init__(self, name:str, camera_follow, camera_offset_x, camera_offset_y, start_tile_x, start_tile_y, characters) -> None:
         self.name = name
         self.camera_follow = camera_follow
         self.camera_offset_x = camera_offset_x
         self.camera_offset_y = camera_offset_y
         self.start_tile_x = start_tile_x
         self.start_tile_y = start_tile_y
+        self.characters = characters
 
     def load(self):
         tilemap_collision = boopy.Tilemap(environment_spritesheet, boopy.get_csv_file_as_lists(f"map/{self.name}_Collision.csv"),(255,0,0))
@@ -34,16 +35,12 @@ class Location:
         player.x = self.start_tile_x * 8
         player.y = self.start_tile_y * 8
 
-        return tilemap_collision, tilemap_decoration, tilemap_singleway
+        return tilemap_collision, tilemap_decoration, tilemap_singleway, self.characters
 
 class Tiletype:
     decoration=0
     collision=1
     singleway=2
-
-class Locations:
-    ingotown = Location("ingotown",True,0,-130,25,19)
-    testtown = Location("ingotown",False,-130,-130,15,19)
 
 class Character:
     def __init__(self) -> None:
@@ -54,6 +51,11 @@ class Character:
         self.velocity_y = 0
         self.jump_force = 2
         self.sprite = 0
+        self.width = 1
+        self.height = 1
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self.x}, {self.y})"
 
     def physics(self):
         new_x = self.x
@@ -138,6 +140,21 @@ class Character:
         
         return False
         
+class Birdman(Character):
+    def __init__(self) -> None:
+        super().__init__()
+        self.sprite = 64
+        self.x = 67 * 8
+        self.y = 20 * 8
+        self.width = 2
+        self.height = 2
+
+class Characters:
+    dave = Birdman()
+
+class Locations:
+    ingotown = Location("ingotown",True,0,-130,25,19,[Characters.dave])
+    testtown = Location("ingotown",False,-130,-130,15,19,[])
 
 class Player(Character):
     def __init__(self) -> None:
@@ -162,7 +179,7 @@ location = Locations.ingotown
 
 player = Player()
 
-tilemap_collision, tilemap_decoration, tilemap_singleway = location.load()
+tilemap_collision, tilemap_decoration, tilemap_singleway, characters = location.load()
 
 def clamp(value, min_val, max_val):
     return max(min(value, max_val), min_val)
@@ -192,9 +209,13 @@ def update():
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_collision)
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_singleway)
 
-    
-    px, py = world_to_screen(player.x, player.y)
-    boopy.draw_spritesheet(px, py, character_spritesheet, player.sprite)
+    print(characters)
+    for character in characters+[player]:
+        for x in range(character.width):
+            for y in range(character.height):
+                px, py = world_to_screen(character.x + x*8, character.y + y*8 - (character.height-1) * 8)
+                tx, ty = character_spritesheet.get_sprite_coordinate_by_index(character.sprite)
+                boopy.draw_spritesheet_from_coordinate(px, py, character_spritesheet, tx + x, ty + y)
     boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
     
     player.move()
