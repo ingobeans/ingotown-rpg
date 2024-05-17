@@ -16,7 +16,9 @@ left_key = [boopy.K_a, boopy.K_LEFT]
 right_key = [boopy.K_d, boopy.K_RIGHT]
 up_key = [boopy.K_w, boopy.K_SPACE, boopy.K_UP]
 down_key = [boopy.K_s, boopy.K_DOWN]
-sprint_key = [boopy.K_LSHIFT]
+sprint_key = [boopy.K_LSHIFT, boopy.K_RSHIFT]
+interact_key = [boopy.K_e, boopy.K_RETURN]
+attack_key = [boopy.K_f]
 
 class Location:
     def __init__(self, name:str, camera_follow, camera_offset_x, camera_offset_y, start_tile_x, start_tile_y, characters) -> None:
