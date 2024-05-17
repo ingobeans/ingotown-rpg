@@ -59,6 +59,9 @@ class Character:
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.x}, {self.y})"
+    
+    def interact(self):
+        pass
 
     def physics(self):
         new_x = self.x
@@ -108,7 +111,15 @@ class Character:
         self.velocity_x /= deceleration_x
 
     def get_interactable_npc(self):
-        pass
+        x_offset = -8 if self.facing_left else 8
+        for character in characters+[player]:
+            if character == self:
+                continue
+            if self.x + x_offset - 8 < character.x < self.x + x_offset + 8:
+                if self.y + - 8 < character.y < self.y + 8:
+                    return character
+                
+        return None
 
     def collides_with_tile(self, x, y, debug = False):
         tile_x_min = int(x / 8)
@@ -156,6 +167,9 @@ class Birdman(Character):
         self.width = 2
         self.height = 2
 
+    def interact(self):
+        self.sprite = 66
+
 class Characters:
     dave = Birdman()
 
@@ -187,7 +201,7 @@ class Player(Character):
 
         interactable_npc = self.get_interactable_npc()
         if boopy.btnp(interact_key):
-            pass
+            interactable_npc.interact()
 
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
@@ -233,7 +247,6 @@ def update():
                 tx, ty = character_spritesheet.get_sprite_coordinate_by_index(character.sprite)
                 boopy.draw_spritesheet_from_coordinate(px, py, character_spritesheet, tx + x, ty + y)
     boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
-    boopy.draw_text(0,10,f"FPS: {player.facing_left}")
     
     player.move()
     player.physics()
