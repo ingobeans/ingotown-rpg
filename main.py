@@ -201,7 +201,8 @@ class Player(Character):
 
         interactable_npc = self.get_interactable_npc()
         if boopy.btnp(interact_key):
-            interactable_npc.interact()
+            if interactable_npc:
+                interactable_npc.interact()
 
 environment_spritesheet = boopy.Spritesheet("assets.png", 8, 8)
 character_spritesheet = boopy.Spritesheet("characters.png", 8, 8)
