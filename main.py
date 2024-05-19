@@ -12,6 +12,8 @@ screen_width, screen_height = calc_screen_size()
 gravity = 0.13
 deceleration_x = 1.4
 
+text_time = 160
+
 left_key = [boopy.K_a, boopy.K_LEFT]
 right_key = [boopy.K_d, boopy.K_RIGHT]
 up_key = [boopy.K_w, boopy.K_SPACE, boopy.K_UP]
@@ -57,8 +59,15 @@ class Character:
         self.height = 1
         self.facing_left = False
 
+        self.text_timer = 0
+        self.text = ""
+
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.x}, {self.y})"
+    
+    def say(self, text):
+        self.text_timer = text_time
+        self.text = text
     
     def interact(self):
         pass
@@ -157,6 +166,17 @@ class Character:
                         return Tiletype.singleway
         
         return False
+    
+    def draw_speech_text(self):
+            text_width, _ = boopy.get_text_size(self.text)
+            sx, sy = world_to_screen(self.x - text_width // 2 + (self.width / 2 * 8), self.y - self.height*8)
+            boopy.draw_rect(sx - 1, sy, sx + text_width + 2, sy + 10, (255,255,255))
+            boopy.draw_text(sx + 1, sy - 4, self.text, (0,0,0))
+    
+    def update(self):
+        if self.text_timer > 0:
+            self.text_timer -= 1
+            self.draw_speech_text()
         
 class Birdman(Character):
     def __init__(self) -> None:
@@ -168,7 +188,7 @@ class Birdman(Character):
         self.height = 2
 
     def interact(self):
-        self.sprite = 66
+        self.say("lil guy, i'm busy")
 
 class Characters:
     dave = Birdman()
@@ -185,7 +205,7 @@ class Player(Character):
         self.jump_force = 2.13
         self.sprint_speed_multiplier = 3
 
-    def move(self):
+    def update(self):
         sprint = self.sprint_speed_multiplier if boopy.btn(sprint_key) else 1
         if boopy.btn(right_key):
             self.velocity_x += self.speed * sprint
@@ -240,16 +260,15 @@ def update():
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_collision)
     boopy.draw_tilemap(tilemap_x, tilemap_y,tilemap_singleway)
 
-    print(characters)
     for character in characters+[player]:
         for x in range(character.width):
             for y in range(character.height):
                 px, py = world_to_screen(character.x + x*8, character.y + y*8 - (character.height-1) * 8)
                 tx, ty = character_spritesheet.get_sprite_coordinate_by_index(character.sprite)
                 boopy.draw_spritesheet_from_coordinate(px, py, character_spritesheet, tx + x, ty + y)
-    boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
     
-    player.move()
-    player.physics()
+        character.update()
+        character.physics()
+    boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
 
 boopy.run(update, screen_width=screen_width, screen_height=screen_height, fullscreen=False, fps_cap=None, vsync=True)
