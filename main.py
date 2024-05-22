@@ -64,11 +64,11 @@ class Character:
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.x}, {self.y})"
-    
+
     def say(self, text):
         self.text_timer = text_time
         self.text = text
-    
+
     def interact(self):
         pass
 
@@ -90,7 +90,7 @@ class Character:
 
         new_y += velocity_y
         new_x += velocity_x
-        
+
         # stop character from moving inside tiles on X axis
         colliding_tile = self.collides_with_tile(new_x, self.y)
         if colliding_tile:
@@ -127,7 +127,7 @@ class Character:
             if self.x + x_offset - 8 < character.x < self.x + x_offset + 8:
                 if self.y + - 8 < character.y < self.y + 8:
                     return character
-                
+
         return None
 
     def collides_with_tile(self, x, y, debug = False):
@@ -157,27 +157,27 @@ class Character:
                 tile = tilemap_collision.get_tile(tile_x, tile_y)
                 if tile != -1:
                     return Tiletype.collision
-                
+
                 # check if there is a single way platform to collide with
                 # but first check that the player is above it and traveling downwards
                 if self.velocity_y > 0 and round(y/8) < tile_y:
                     tile = tilemap_singleway.get_tile(tile_x, tile_y)
                     if tile != -1:
                         return Tiletype.singleway
-        
+
         return False
-    
+
     def draw_speech_text(self):
             text_width, _ = boopy.get_text_size(self.text)
             sx, sy = world_to_screen(self.x - text_width // 2 + (self.width / 2 * 8), self.y - self.height*8)
             boopy.draw_rect(sx - 1, sy, sx + text_width + 2, sy + 10, (255,255,255))
             boopy.draw_text(sx + 1, sy - 4, self.text, (0,0,0))
-    
+
     def update(self):
         if self.text_timer > 0:
             self.text_timer -= 1
             self.draw_speech_text()
-        
+
 class Birdman(Character):
     def __init__(self) -> None:
         super().__init__()
@@ -242,7 +242,7 @@ def world_to_screen(x, y):
             offset_x = player.x - (screen_width // 2)
         elif player.x > tilemap_collision.map_width * 8 - screen_width // 2 + location.camera_offset_x:
             offset_x = player.x - (tilemap_collision.map_width * 8 - screen_width // 2)
-        else: 
+        else:
             offset_x = location.camera_offset_x
 
 
@@ -250,7 +250,7 @@ def world_to_screen(x, y):
         sy = screen_height // 2 + y + location.camera_offset_y
 
         return sx, sy
-    return screen_width // 2 + x + player.camera_x, screen_height // 2 + y + location.camera_offset_y
+    return screen_width // 2 + x + location.camera_offset_x, screen_height // 2 + y + location.camera_offset_y
 
 def update():
     boopy.cls((104,204,255))
@@ -266,7 +266,7 @@ def update():
                 px, py = world_to_screen(character.x + x*8, character.y + y*8 - (character.height-1) * 8)
                 tx, ty = character_spritesheet.get_sprite_coordinate_by_index(character.sprite)
                 boopy.draw_spritesheet_from_coordinate(px, py, character_spritesheet, tx + x, ty + y)
-    
+
         character.update()
         character.physics()
     boopy.draw_text(0,0,f"FPS: {boopy.get_fps()}")
